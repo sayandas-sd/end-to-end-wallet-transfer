@@ -2,16 +2,17 @@ import express from "express";
 import db from "@repo/db/client";
 const app = express();
 
-app.use(express.json())
+app.use(express.json());
 
-app.post("/hdfcWebhook", async (req, res) => {
-    //TODO: Add zod validation here?
-    //TODO: HDFC bank should ideally send us a secret so we know this is sent by them
-    const paymentInformation: {
-        token: string;
-        userId: string;
-        amount: string
-    } = {
+interface paymentType {
+    token: string;
+    userId: string;
+    amount: string;
+}
+
+app.post("/bankWebhook", async (req, res) => {
+    
+    const paymentInformation: paymentType = {
         token: req.body.token,
         userId: req.body.user_identifier,
         amount: req.body.amount
@@ -24,8 +25,7 @@ app.post("/hdfcWebhook", async (req, res) => {
                     userId: Number(paymentInformation.userId)
                 },
                 data: {
-                    amount: {
-                        // You can also get this from your DB
+                    amount: {                        
                         increment: Number(paymentInformation.amount)
                     }
                 }
@@ -46,7 +46,7 @@ app.post("/hdfcWebhook", async (req, res) => {
     } catch(e) {
         console.error(e);
         res.status(411).json({
-            message: "Error while processing webhook"
+            message: "Error while processing"
         })
     }
 
